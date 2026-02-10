@@ -1,20 +1,27 @@
 import bcrypt from 'bcryptjs';
+import JsonWebToken from 'jsonwebtoken';
+import dotenv from 'dotenv';
+dotenv.config();
 
 
 //base de datos local de ejemplo;; aqui se conectaria a una base de datos real
 const usuarios = [{
-    nombre: "juan pablo",
-    correo: "juangomez311034@gmail.com",
-    password: "12"},{  nombre: 'jp',
+    nombre: "juan p",
+    correo: "juangomez0110@gmail.com",
+    password: "12"},
+    {  nombre: 'jp',
   correo: 'juangomez311034@algo.com',
   password: '$2b$10$Xg4aSHJb7hW9AhS2YOQOcebpMqLnhknP70N1CvmNhGMknUGmkujve'}];
-
+// funcion admin 
+async function admin (req, res) {
+    res.status(200).json({ status: 'ok', message: 'bienvenido al area de administracion'});
+}
 
 
 
 //funcion login 
 async function login(req, res) {
-    console.log(req.body);
+
     const nombre = req.body.nombre;
     const password = req.body.password;
       if (!nombre || !password) {
@@ -26,11 +33,35 @@ async function login(req, res) {
     if (!usuarioARevisar) {
         return res.status(400).json({ status: 'error',    message: 'usuario no encontrado'});
         }
-    const loginValido = await bcrypt.compare(password, usuarioARevisar.password);
-    console.log(loginValido);
+// con las siguientes constantes se busca en la constante donde se encuentra la BD 
+// y se comparan los datos ingresados con los almacenados
+   
+        const passwordValido = await bcrypt.compare(password, usuarioARevisar.password);
+         
+        if (!passwordValido) {
+    return res.status(400).json({
+      status: 'error',
+      message: 'Contraseña incorrecta'
+    });
+  }
+
+
+  // se crea el token con toda la info del usuario 
+
+const token =JsonWebToken.sign({nombre: usuarioARevisar.nombre}, procces.env.JWT_SECRET, {expiresIn: '7d'});
+
+// a continuacion se crea una cookie 
+
+const cookieOption={
+
+    expires: process.env.JWT_COOKIE_EXPIRES * 24 * 60 *60 *1000,
+    path: "/"
+}
+
+res.cookie(jwt,token,{ cookieOption: true , maxAge: 24*60*60*1000, httpOnly: true });
+res.send(statusbar="ok s", message= "usuario loggeado ", redirect = "admin")
 
 };
-
 //funcion de registro de usuario 
 async function register(req, res) 
 {
@@ -62,4 +93,5 @@ usuarios.push(nuevoUsuario);
 export const methods = {
   login,
   register,
+  admin, 
 };

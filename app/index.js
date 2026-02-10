@@ -27,3 +27,4 @@ app.get("/admin", (req , res) => res.sendFile(__dirname + "/pages/Admin/admin.ht
 
 app.post("/api/register", authentication.register);
 app.post("/api/login", authentication.login);
+app.post("/api/admin", authentication.admin);
